@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaxy</title> 
+    <title>Galaxy Editor</title>
     <style>
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background-color: #000;
             font-family: 'Consolas', monospace;
-            background-color: #000; 
         }
 
         #container {
@@ -46,49 +48,94 @@
             position: absolute;
             bottom: 20px;
             left: 20px;
+            right: 20px;
             z-index: 3;
             display: flex;
+            justify-content: space-between;
             gap: 10px;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .controls.hidden {
+            display: none;
         }
 
         button {
             padding: 10px;
-            border: none;
-            cursor: pointer;
-            background-color: #555;
+            border: 1px solid #fff;
+            background-color: #000;
             color: #fff;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         button:hover {
-            background-color: #777;
+            background-color: #333;
+            border-color: #fff;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
+        #loadingScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 4;
+            background-color: #000;
+            opacity: 1;
+            transition: opacity 2s ease-in-out;
+        }
+
+        #loadingScreen .loader {
+            border: 8px solid #000;
+            border-top: 8px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        #loadingScreen .loading-text {
+            color: #fff;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
             }
-            to {
-                opacity: 1;
+
+            100% {
+                transform: rotate(360deg);
             }
         }
+
     </style>
 </head>
+
 <body>
     <div id="container">
         <div class="particles-js" id="particles-js"></div>
         <div id="editorContainer"></div>
-        <div class="controls">
+        <div class="controls hidden">
             <button id="executeButton">Execute</button>
             <button id="clearButton">Clear</button>
+        </div>
+        <div id="loadingScreen">
+            <div class="loader"></div>
+            <div class="loading-text">loading...</div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.min.js"></script>
     <script>
-        
         particlesJS('particles-js', {
             "particles": {
                 "number": {
@@ -109,10 +156,10 @@
                     }
                 },
                 "opacity": {
-                    "value": 0.5,  
+                    "value": 0.5,
                     "random": false,
                     "anim": {
-                        "enable": false  
+                        "enable": false
                     }
                 },
                 "size": {
@@ -152,7 +199,6 @@
             "retina_detect": true
         });
 
-    
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' } });
         require(['vs/editor/editor.main'], function () {
             monaco.editor.defineTheme('Dark', {
@@ -173,23 +219,21 @@
                 fontSize: 14
             });
 
-            
             document.getElementById('editorContainer').style.opacity = 1;
-            document.getElementById('editorContainer').style.animation = 'fadeIn 2s ease-in-out';
-
-    
-            document.getElementById('executeButton').addEventListener('click', function () {
-                
-                console.log('Execute button clicked');
-            });
-
-            document.getElementById('clearButton').addEventListener('click', function () {
-                editor.setValue('');
-                console.log('Clear button clicked');
-            });
+            document.querySelector('.controls').style.opacity = 1;
         });
 
-        document.querySelector('#particles-js').style.pointerEvents = 'none';
+        // Hide the loading screen after 5 seconds
+        setTimeout(function () {
+            document.getElementById('loadingScreen').style.opacity = 0;
+            setTimeout(function() {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('editorContainer').style.opacity = 1;
+                document.querySelector('.controls').classList.remove('hidden');
+                document.querySelector('.controls').style.opacity = 1;
+            }, 2000); // Wait for the fade-out transition to complete
+        }, 3000); // Adjusted to 3 seconds to match the requested delay
     </script>
 </body>
+
 </html>
